@@ -61,6 +61,7 @@ Output ONLY valid JSON.
       }
       
     } catch (err) {
+      console.error('\n[AI Error]: Failed to generate patch for issue.', err.message || err);
       // If AI fails, just push the original issue without a patch
       patchedIssues.push(issue);
     }
