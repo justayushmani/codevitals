@@ -87,21 +87,9 @@ Output ONLY valid JSON.
       }
       
     } catch (err) {
-      console.warn('\n⚠️ [CodeVitals Warning]: Gemini API Quota Exceeded. Generating Mock AI responses for dashboard testing.');
-      
-      // Since you are hitting quota limits, let's provide a Mock response
-      // so your dashboard UI still looks great while you sort out billing!
-      chunk.forEach(issue => {
-        patchedIssues.push({
-          ...issue,
-          ai: {
-            issueSummary: `[Mock] Fixed ${issue.type}`,
-            originalCode: issue.snippet,
-            patchedCode: `// [Mock Patch applied because API Quota was exceeded]\n// Secure implementation of ${issue.type}\nconst secureMode = process.env.SECRET || 'secure';\n\n${issue.snippet}`,
-            explanation: `This is a mock AI response because your Google Cloud project hit a quota/billing limit (429 Error). To see real AI patches, you'll need to check your GCP billing or wait for the quota to reset. But hey, the dashboard UI works!`
-          }
-        });
-      });
+      console.error('\n[AI Error]: Failed to generate patch for issue chunk.', err.message || err);
+      // If AI fails, just push the original issues without a patch
+      chunk.forEach(issue => patchedIssues.push(issue));
     }
     
     // Add a small delay between chunks to further prevent rate limiting
