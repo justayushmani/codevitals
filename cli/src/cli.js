@@ -62,7 +62,7 @@ async function main() {
   const compressed = LZString.compressToEncodedURIComponent(jsonString);
   s.stop(pc.green('Payload compressed successfully.'));
 
-  const dashboardUrl = `https://codevitals-dashboard.vercel.app/report?data=${compressed}`;
+  const dashboardUrl = `https://codevitals.vercel.app/report?data=${compressed}`;
   
   // NOTE: If testing locally, you can change the URL to:
   // const dashboardUrl = `http://localhost:5173/report?data=${compressed}`;
