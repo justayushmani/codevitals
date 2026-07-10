@@ -2,7 +2,7 @@
 import { intro, outro, text, spinner, isCancel, cancel } from '@clack/prompts';
 import pc from 'picocolors';
 import open from 'open';
-import LZString from 'lz-string';
+import http from 'http';
 import { analyzeProject } from './analyzer.js';
 import { getAIPatches } from './gemini.js';
 
@@ -57,21 +57,44 @@ async function main() {
     timestamp: new Date().toISOString()
   };
 
-  s.start('Preparing dashboard payload...');
-  const jsonString = JSON.stringify(reportData);
-  const compressed = LZString.compressToEncodedURIComponent(jsonString);
-  s.stop(pc.green('Payload compressed successfully.'));
+  s.start('Starting local data server...');
+  
+  // Create a local server to serve the payload, bypassing URL length limits!
+  const server = http.createServer((req, res) => {
+    // Enable CORS so the web dashboard can fetch this data
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+    
+    if (req.url === '/data') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(reportData));
+    } else {
+      res.writeHead(404);
+      res.end();
+    }
+  });
 
-  const dashboardUrl = `https://codevitals.vercel.app/report?data=${compressed}`;
-  
-  // NOTE: If testing locally, you can change the URL to:
-  // const dashboardUrl = `http://localhost:5173/report?data=${compressed}`;
-  
-  console.log(`\nOpening Dashboard: ${pc.cyan(dashboardUrl)}\n`);
-  
-  await open(dashboardUrl);
-  
-  outro(pc.bgGreen(pc.black(' Done! ')));
+  server.listen(0, async () => {
+    const port = server.address().port;
+    s.stop(pc.green('Local server running.'));
+
+    // We pass the port number instead of the massive payload
+    // If you are testing the dashboard locally, you can use:
+    // const dashboardUrl = \`http://localhost:5173/report?port=\${port}\`;
+    const dashboardUrl = \`https://codevitals.vercel.app/report?port=\${port}\`;
+    
+    console.log(\`\\nOpening Dashboard: \${pc.cyan(dashboardUrl)}\\n\`);
+    console.log(pc.yellow('Please keep this terminal open while viewing the dashboard.'));
+    console.log(pc.gray('Press Ctrl+C when you are done to exit.'));
+    
+    await open(dashboardUrl);
+  });
 }
 
 main().catch(console.error);

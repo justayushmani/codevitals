@@ -9,22 +9,44 @@ function ReportLoader() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    try {
-      const compressed = searchParams.get('data');
-      if (compressed) {
-        const jsonString = LZString.decompressFromEncodedURIComponent(compressed);
-        if (jsonString) {
-          setReportData(JSON.parse(jsonString));
-        } else {
-          setError('Failed to decompress data payload.');
+    const loadData = async () => {
+      try {
+        const port = searchParams.get('port');
+        
+        // New robust way: fetch from local CLI server
+        if (port) {
+          try {
+            const res = await fetch(`http://localhost:${port}/data`);
+            if (!res.ok) throw new Error('Failed to fetch from local CLI server');
+            const json = await res.json();
+            setReportData(json);
+            return;
+          } catch (err) {
+            setError('Could not connect to the local CodeVitals CLI server. Is it still running in your terminal?');
+            console.error(err);
+            return;
+          }
         }
-      } else {
-        setError('No data found in the URL. Please run `npx codevitals` locally.');
+
+        // Legacy way: compressed query param
+        const compressed = searchParams.get('data');
+        if (compressed) {
+          const jsonString = LZString.decompressFromEncodedURIComponent(compressed);
+          if (jsonString) {
+            setReportData(JSON.parse(jsonString));
+          } else {
+            setError('Failed to decompress data payload.');
+          }
+        } else {
+          setError('No data found in the URL. Please run `npx codevitals-cli` locally.');
+        }
+      } catch (e) {
+        setError('Error parsing the report data.');
+        console.error(e);
       }
-    } catch (e) {
-      setError('Error parsing the report data.');
-      console.error(e);
-    }
+    };
+    
+    loadData();
   }, [searchParams]);
 
   if (error) {
