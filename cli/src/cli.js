@@ -86,10 +86,10 @@ async function main() {
 
     // We pass the port number instead of the massive payload
     // If you are testing the dashboard locally, you can use:
-    // const dashboardUrl = \`http://localhost:5173/report?port=\${port}\`;
-    const dashboardUrl = \`https://codevitals.vercel.app/report?port=\${port}\`;
+    // const dashboardUrl = `http://localhost:5173/report?port=${port}`;
+    const dashboardUrl = `https://codevitals.vercel.app/report?port=${port}`;
     
-    console.log(\`\\nOpening Dashboard: \${pc.cyan(dashboardUrl)}\\n\`);
+    console.log(`\nOpening Dashboard: ${pc.cyan(dashboardUrl)}\n`);
     console.log(pc.yellow('Please keep this terminal open while viewing the dashboard.'));
     console.log(pc.gray('Press Ctrl+C when you are done to exit.'));
     
