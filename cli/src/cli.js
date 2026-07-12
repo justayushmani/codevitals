@@ -4,18 +4,18 @@ import pc from 'picocolors';
 import open from 'open';
 import http from 'http';
 import { analyzeProject } from './analyzer.js';
-import { getAIPatches } from './gemini.js';
+import { getAIPatches } from './groq.js';
 
 async function main() {
   console.log();
   intro(pc.bgBlue(pc.white(' CodeVitals Security & Quality Analyzer ')));
 
-  let apiKey = process.env.GEMINI_API_KEY;
+  let apiKey = process.env.GROQ_API_KEY;
 
   if (!apiKey) {
     apiKey = await text({
-      message: 'No GEMINI_API_KEY found in environment. Please provide it:',
-      placeholder: 'AIzaSy...',
+      message: 'No GROQ_API_KEY found in environment. Please provide it:',
+      placeholder: 'gsk_...',
       validate(value) {
         if (value.length === 0) return 'API Key is required!';
       }
@@ -40,7 +40,7 @@ async function main() {
   let finalIssues = issues;
 
   if (issues.length > 0) {
-    s.start(`Generating AI patches for ${issues.length} issues using Gemini...`);
+    s.start(`Generating AI patches for ${issues.length} issues using Groq...`);
     
     // 2. Fetch AI Patches
     finalIssues = await getAIPatches(apiKey, issues);
